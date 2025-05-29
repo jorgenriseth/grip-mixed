@@ -23,6 +23,11 @@ def main(subject):
         dtype=np.single,
     )
     csf_seg_mri = create_csf_seg(aparc_mri, mask_base_mri)
+    sm.save_mri(
+        csf_seg_mri,
+        f"mri_processed_data/{subject}/segmentations/{subject}_seg-csf_mask.nii.gz",
+        dtype=np.uint8,
+    )
 
     def to_cortex_labels(description_list):
         """Map a cortical region-description to it's corresponding FreeSurfer name
