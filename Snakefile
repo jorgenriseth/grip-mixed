@@ -20,8 +20,11 @@ rule all:
       print(f"{subject}: {sessions}")
 
 
-
-
+# Snakemake creates output directories, before running the shell command.
+# Since FreeSurfer checks for existing subject directories before running
+# recon_all with the usual command, I here do and alternative approach,
+# where we copy the T1 and FLAIR files into the target directories, and 
+# start from there.
 rule recon_all:
   input:
     t1w="mri_dataset/{subject}/ses-01/anat/sub-01_ses-01_T1w.nii.gz",
@@ -33,7 +36,7 @@ rule recon_all:
   container:
     "docker://freesurfer/freesurfer:7.4.1"
   shell:
-    "mri_convert {input.t1w} {output.t1w} && "
+    "mri_convert {input.t1w} {output.t1w} && "  
     "mri_convert --no_scale 1 {input.flair} {output.flair} && "
     "recon-all"
     " -all"
