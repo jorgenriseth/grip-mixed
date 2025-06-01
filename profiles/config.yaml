@@ -1,0 +1,2 @@
+use-singularity: True
+singularity-args: " -B license.txt:/usr/local/freesurfer/.license'"

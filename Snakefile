@@ -19,20 +19,29 @@ rule all:
     for subject, sessions in SESSIONS.items():
       print(f"{subject}: {sessions}")
 
+
+
+
 rule recon_all:
   input:
-    t1w="mri_dataset/{subject}/ses-01/sub-01_ses-01_T1w.nii.gz",
-    flair="mri_dataset/{subject}/ses-01/sub-01_ses-01_FLAIR.nii.gz",
+    t1w="mri_dataset/{subject}/ses-01/anat/sub-01_ses-01_T1w.nii.gz",
+    flair="mri_dataset/{subject}/ses-01/anat/sub-01_ses-01_FLAIR.nii.gz",
   output: # protected to avoid accidental reruns.
-    protected("mri_processed_data/freesurfer/{{subject}}/mri/aparc+aseg.mgz")
+    seg=protected("mri_processed_data/freesurfer/{subject}/mri/aparc+aseg.mgz"),
+    t1w=protected("mri_processed_data/freesurfer/{subject}/mri/orig/001.mgz"),
+    flair=protected("mri_processed_data/freesurfer/{subject}/mri/orig/FLAIRraw.mgz"),
+  container:
+    "docker://freesurfer/freesurfer:7.4.1"
   shell:
-    "recon-all -all"
-    " -s {wildcards.subject}"
+    "mri_convert {input.t1w} {output.t1w} && "
+    "mri_convert --no_scale 1 {input.flair} {output.flair} && "
+    "recon-all"
+    " -all"
     " -sd mri_processed_data/freesurfer"
-    " -i {input.t1w}"
-    " -FLAIR {input.flair}"
-    " -FLAIRpial"
+    " -s {wildcards.subject}"
     " -parallel"
+    " -FLAIRpial"
+    " -FLAIR {output.flair}"
 
 rule estimate_T1maps:
   input:
@@ -42,6 +51,8 @@ rule estimate_T1maps:
   output:
     raw="mri_dataset/derivatives/{subject}/{ses}/{subject}_{ses}_acq-mixed_T1map_raw.nii.gz",
     postprocessed="mri_dataset/derivatives/{subject}/{ses}/{subject}_{ses}_acq-mixed_T1map.nii.gz"
+  conda:
+    "envs/grip-mixed.yaml"
   shell:
     "gmri2fem mri mixed-t1map"
       " --SE {input.se}"
@@ -49,6 +60,7 @@ rule estimate_T1maps:
       " --meta {input.meta}"
       " --output {output.raw}"
       " --postprocessed {output.postprocessed}"
+      " --t1_high 20000"
 
 rule setup_reference_image:
   input:
@@ -66,6 +78,7 @@ rule register_pre_contrast_se:
     moving="mri_dataset/{subject}/ses-01/mixed/{subject}_ses-01_acq-mixed_SE-modulus.nii.gz"
   output:
     "mri_processed_data/{subject}/transforms/{subject}_ses-01_acq-mixed.mat"
+  container: "docker/greedy.sif"
   threads: workflow.cores
   shell:
     "greedy -d 3 -a"
@@ -83,6 +96,9 @@ rule reslice_pre_contrast_se:
     transform="mri_processed_data/{subject}/transforms/{subject}_ses-01_acq-mixed.mat",
   output:
     "mri_processed_data/{subject}/registered/{subject}_ses-01_acq-mixed_SE-modulus_registered.nii.gz",
+  container: "docker/greedy.sif"
+  conda:
+    "envs/grip-mixed.yaml"
   shell:
     "greedy -d 3"
     " -rf {input.reference}"
@@ -97,6 +113,7 @@ rule register_se_to_reference:
     moving="mri_dataset/{subject}/{ses}/mixed/{subject}_{ses}_acq-mixed_SE-modulus.nii.gz"
   output:
     "mri_processed_data/{subject}/transforms/{subject}_{ses}_acq-mixed.mat"
+  container: "docker/greedy.sif"
   threads: workflow.cores
   shell:
     "greedy -d 3 -a"
@@ -114,6 +131,7 @@ rule reslice_mixed_t1map:
     transform="mri_processed_data/{subject}/transforms/{subject}_{session}_acq-mixed.mat",
   output:
     "mri_processed_data/{subject}/registered/{subject}_{session}_acq-mixed_T1map_raw_registered.nii.gz"
+  container: "docker/greedy.sif"
   shell:
     "greedy -d 3"
     " -rf {input.reference}"
@@ -130,6 +148,8 @@ rule run_segmentation:
     "mri_processed_data/{subject}/segmentations/{subject}_seg-csf_mask.nii.gz",
     "mri_processed_data/{subject}/segmentations/{subject}_seg-csf_sas-ventricle-cerebellum.nii.gz",
     "mri_processed_data/{subject}/segmentations/{subject}_seg-csf_grouped.nii.gz",
+  conda:
+    "envs/grip-mixed.yaml"
   shell:
     "python main.py {wildcards.subject}"
 
@@ -140,6 +160,8 @@ rule estimate_csf_concentration:
     mask="mri_processed_data/{subject}/segmentations/{subject}_seg-csf_mask.nii.gz"
   output:
     "mri_processed_data/{subject}/concentrations/{subject}_{session}_acq-mixed_concentration.nii.gz"
+  conda:
+    "envs/grip-mixed.yaml"
   shell:
     "gmri2fem mri concentration"
     " --input {input.image}"
