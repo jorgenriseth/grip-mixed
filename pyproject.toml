@@ -1,27 +1,18 @@
 [project]
 name = "grip-mixed"
 version = "0.1.0"
-description = "Add your description here"
+description = "Processing pipeline for the Mixed IR/SE MR-sequence for use in gMRI."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
   "click",
-  #"gmri2fem",
+  "gmri2fem>=0.2.0",
   "matplotlib",
   "numpy",
   "pandas",
   "snakemake>=7",
 ]
 
-[tool.uv.sources]
-gmri2fem = { path = "../../../gmri2fem", editable = true }
-
 [tool.pixi.workspace]
 channels = ["conda-forge", "bioconda"]
 platforms = ["linux-64"]
-
-[tool.pixi.pypi-dependencies]
-#grip-mixed = { path = ".", editable = true }
-gmri2fem = { path = "../../../gmri2fem", editable = true }
-
-[tool.pixi.tasks]
