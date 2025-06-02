@@ -1,0 +1,16 @@
+name: default
+channels:
+- conda-forge
+- bioconda
+- nodefaults
+dependencies:
+- python >=3.11
+- pip
+- pip:
+  - click
+  - gmri2fem>=0.2.1a0
+  - matplotlib
+  - numpy
+  - pandas
+  - snakemake>=7
+

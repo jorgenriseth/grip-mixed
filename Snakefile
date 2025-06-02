@@ -81,7 +81,7 @@ rule register_pre_contrast_se:
     moving="mri_dataset/{subject}/ses-01/mixed/{subject}_ses-01_acq-mixed_SE-modulus.nii.gz"
   output:
     "mri_processed_data/{subject}/transforms/{subject}_ses-01_acq-mixed.mat"
-  container: "docker/greedy.sif"
+  container: "docker://jorgenriseth/greedy:v1.3.0a"
   threads: workflow.cores
   shell:
     "greedy -d 3 -a"
@@ -99,7 +99,7 @@ rule reslice_pre_contrast_se:
     transform="mri_processed_data/{subject}/transforms/{subject}_ses-01_acq-mixed.mat",
   output:
     "mri_processed_data/{subject}/registered/{subject}_ses-01_acq-mixed_SE-modulus_registered.nii.gz",
-  container: "docker/greedy.sif"
+  container: "docker://jorgenriseth/greedy:v1.3.0a"
   conda:
     "envs/grip-mixed.yaml"
   shell:
@@ -116,7 +116,7 @@ rule register_se_to_reference:
     moving="mri_dataset/{subject}/{ses}/mixed/{subject}_{ses}_acq-mixed_SE-modulus.nii.gz"
   output:
     "mri_processed_data/{subject}/transforms/{subject}_{ses}_acq-mixed.mat"
-  container: "docker/greedy.sif"
+  container: "docker://jorgenriseth/greedy:v1.3.0a"
   threads: workflow.cores
   shell:
     "greedy -d 3 -a"
@@ -134,7 +134,7 @@ rule reslice_mixed_t1map:
     transform="mri_processed_data/{subject}/transforms/{subject}_{session}_acq-mixed.mat",
   output:
     "mri_processed_data/{subject}/registered/{subject}_{session}_acq-mixed_T1map_raw_registered.nii.gz"
-  container: "docker/greedy.sif"
+  container: "docker://jorgenriseth/greedy:v1.3.0a"
   shell:
     "greedy -d 3"
     " -rf {input.reference}"
