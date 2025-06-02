@@ -56,6 +56,9 @@ rule estimate_T1maps:
     postprocessed="mri_dataset/derivatives/{subject}/{ses}/{subject}_{ses}_acq-mixed_T1map.nii.gz"
   conda:
     "envs/grip-mixed.yaml"
+  params:
+    t1_low=100,
+    t1_high=10000,
   shell:
     "gmri2fem mri mixed-t1map"
       " --SE {input.se}"
@@ -63,7 +66,8 @@ rule estimate_T1maps:
       " --meta {input.meta}"
       " --output {output.raw}"
       " --postprocessed {output.postprocessed}"
-      " --t1_high 20000"
+      " --t1_low {params.t1_low}"
+      " --t1_high {params.t1_high}"
 
 rule setup_reference_image:
   input:
@@ -172,3 +176,14 @@ rule estimate_csf_concentration:
     " --output {output}"
     " --mask {input.mask}"
     " --r1 0.004"
+
+rule T1_to_R1:
+  input:
+    "{anyprefix}T1map{anysuffix}"
+  output:
+    "{anyprefix}R1map{anysuffix}"
+  params:
+    t1_low=100,
+    t1_high=10000,
+  shell:
+    "gmri2fem mri t1-to-r1 --input {input} --output {output} --T1_low {params.t1_low} --T1_high {params.t1_high}"
