@@ -26,7 +26,7 @@ pixi install
 ```
 
 ### Data
-To replicate the processing steps of the accompanying article [insert citation here], you need the following data for each subject, (with `ses` representing the session):
+To replicate the processing steps of the accompanying article [https://doi.org/10.1101/2025.07.19.25331835], you need the following data for each subject, (with `ses` representing the session):
 - `mri_dataset/$subject/ses-01/anat/${subject}_ses-01_T1w.nii.gz`
 - `mri_dataset/$subject/$ses/mixed/${subject}_${ses}_acq-mixed_IR-corrected-real.nii.gz`
 - `mri_dataset/$subject/$ses/mixed/${subject}_${ses}_acq-mixed_SE-modulus.nii.gz`
