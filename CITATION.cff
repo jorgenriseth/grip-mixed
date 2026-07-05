@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata in this file."
+type: software
+title: "grip-mixed"
+abstract: "Processing pipeline for the Mixed IR/SE MR-sequence for use in gMRI."
+authors:
+  - given-names: Jørgen
+    family-names: Riseth
+version: 0.1.0
+license: MIT
+repository-code: "https://github.com/jorgenriseth/grip-mixed"
